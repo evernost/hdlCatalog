@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wave_config>
+   <wave_state>
+   </wave_state>
+   <db_ref_list>
+      <db_ref path="tb_sim.wdb" id="1">
+         <top_modules>
+            <top_module name="blinky_pkg" />
+            <top_module name="tb_blinky" />
+         </top_modules>
+      </db_ref>
+   </db_ref_list>
+   <zoom_setting>
+      <ZoomStartTime time="96,347.563333 us"></ZoomStartTime>
+      <ZoomEndTime time="98,107.563334 us"></ZoomEndTime>
+      <Cursor1Time time="96,791.563333 us"></Cursor1Time>
+   </zoom_setting>
+   <column_width_setting>
+      <NameColumnWidth column_width="276"></NameColumnWidth>
+      <ValueColumnWidth column_width="120"></ValueColumnWidth>
+   </column_width_setting>
+   <WVObjectSize size="6" />
+   <wvobject fp_name="/tb_blinky/clock" type="logic">
+      <obj_property name="ElementShortName">clock</obj_property>
+      <obj_property name="ObjectShortName">clock</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_blinky/reset" type="logic">
+      <obj_property name="ElementShortName">reset</obj_property>
+      <obj_property name="ObjectShortName">reset</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_blinky/blink" type="logic">
+      <obj_property name="ElementShortName">blink</obj_property>
+      <obj_property name="ObjectShortName">blink</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_blinky/dut_blinky_0/timer_over" type="logic">
+      <obj_property name="ElementShortName">timer_over</obj_property>
+      <obj_property name="ObjectShortName">timer_over</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_blinky/dut_blinky_0/pwm_cnt_en" type="logic">
+      <obj_property name="ElementShortName">pwm_cnt_en</obj_property>
+      <obj_property name="ObjectShortName">pwm_cnt_en</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_blinky/dut_blinky_0/pwm_cnt" type="array">
+      <obj_property name="ElementShortName">pwm_cnt[8:0]</obj_property>
+      <obj_property name="ObjectShortName">pwm_cnt[8:0]</obj_property>
+      <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+   </wvobject>
+</wave_config>

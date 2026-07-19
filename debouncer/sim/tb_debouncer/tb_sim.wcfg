@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wave_config>
+   <wave_state>
+   </wave_state>
+   <db_ref_list>
+      <db_ref path="tb_sim.wdb" id="1">
+         <top_modules>
+            <top_module name="tb_debouncer" />
+         </top_modules>
+      </db_ref>
+   </db_ref_list>
+   <zoom_setting>
+      <ZoomStartTime time="0.000000000 ms"></ZoomStartTime>
+      <ZoomEndTime time="200.000000001 ms"></ZoomEndTime>
+      <Cursor1Time time="20.000000000 ms"></Cursor1Time>
+   </zoom_setting>
+   <column_width_setting>
+      <NameColumnWidth column_width="276"></NameColumnWidth>
+      <ValueColumnWidth column_width="116"></ValueColumnWidth>
+   </column_width_setting>
+   <WVObjectSize size="12" />
+   <wvobject fp_name="/tb_debouncer/clock" type="logic">
+      <obj_property name="ElementShortName">clock</obj_property>
+      <obj_property name="ObjectShortName">clock</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_debouncer/reset" type="logic">
+      <obj_property name="ElementShortName">reset</obj_property>
+      <obj_property name="ObjectShortName">reset</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_debouncer/button" type="logic">
+      <obj_property name="ElementShortName">button</obj_property>
+      <obj_property name="ObjectShortName">button</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_debouncer/state" type="logic">
+      <obj_property name="ElementShortName">state</obj_property>
+      <obj_property name="ObjectShortName">state</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_debouncer/state_n" type="logic">
+      <obj_property name="ElementShortName">state_n</obj_property>
+      <obj_property name="ObjectShortName">state_n</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_debouncer/toggle" type="logic">
+      <obj_property name="ElementShortName">toggle</obj_property>
+      <obj_property name="ObjectShortName">toggle</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_debouncer/irq" type="logic">
+      <obj_property name="ElementShortName">irq</obj_property>
+      <obj_property name="ObjectShortName">irq</obj_property>
+   </wvobject>
+   <wvobject type="divider" fp_name="divider8">
+      <obj_property name="label">INTERNAL</obj_property>
+      <obj_property name="DisplayName">label</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_debouncer/dut_debouncer_0/fsm_state" type="other">
+      <obj_property name="ElementShortName">fsm_state</obj_property>
+      <obj_property name="ObjectShortName">fsm_state</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_debouncer/dut_debouncer_0/button_sync" type="logic">
+      <obj_property name="ElementShortName">button_sync</obj_property>
+      <obj_property name="ObjectShortName">button_sync</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_debouncer/dut_debouncer_0/out_reg" type="logic">
+      <obj_property name="ElementShortName">out_reg</obj_property>
+      <obj_property name="ObjectShortName">out_reg</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_debouncer/dut_debouncer_0/event_flag" type="logic">
+      <obj_property name="ElementShortName">event_flag</obj_property>
+      <obj_property name="ObjectShortName">event_flag</obj_property>
+   </wvobject>
+</wave_config>
