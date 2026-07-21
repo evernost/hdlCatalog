@@ -87,7 +87,7 @@ def _insertROM(line) :
   line.append("  constant BRIGHTNESS_ROM : ROM_TYPE := \n")
   line.append("  (\n")
   for i in range(BRIGHTNESS_STEPS) :
-    
+
     # TODO: with the rounding, is there a risk that 'val' exceeds the number
     # of bits available for the PWM (i.e. PWM_RESOL_NBITS)?
     val = int(round(10**((i/BRIGHTNESS_STEPS)*math.log10(pwmSteps))))-1

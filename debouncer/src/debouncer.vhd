@@ -45,27 +45,34 @@ library work; use work.debouncer_pkg.all;
 entity debouncer is
 generic
 (
-  RESET_SYNC      : BOOLEAN;                    -- Make the reset synchronous
-  RESET_POL       : STD_LOGIC;                  -- Reset active state
-  CLOCK_FREQ_MHZ  : REAL;                       -- Clock frequency in MHz
-  CHANNELS        : INTEGER;                    -- Number of channels
-  BLIND_TIME_MS   : REAL := 1.0;                -- Time period (in ms) during which the state of the input is ignored
-  IRQ_TRIG_POL    : INTEGER range 0 to 2 := 1;  -- IRQ trigger event: rising edge (0), falling edge (1) or both (2)
-  IRQ_DURATION    : INTEGER range 1 to 15 := 1  -- IRQ notification time (in clock cycles)
+  RESET_SYNC      : BOOLEAN;                -- True: synchronous reset. False: asynchronous reset
+  RESET_POL       : STD_LOGIC;              -- Reset active state
+  CLOCK_FREQ_MHZ  : REAL;                   -- System clock frequency (in MHz)
+  CHANNELS        : INTEGER;                -- Number of channels to debounce
+  BLIND_TIME_MS   : REAL;                   -- Time period (in ms) during which the state of the input is ignored
+  IRQ_DURATION    : INTEGER range 1 to 15   -- IRQ notification time (in clock cycles)
 );
 port
 ( 
-  clock   : in STD_LOGIC;
-  reset   : in STD_LOGIC; 
+  -- System interface
+  clock         : in STD_LOGIC;
+  reset         : in STD_LOGIC; 
   
-  din     : in STD_LOGIC_VECTOR(CHANNELS-1 downto 0);
+  -- Noisy inputs
+  din           : in STD_LOGIC_VECTOR(CHANNELS-1 downto 0);
 
-  dout    : out STD_LOGIC_VECTOR(CHANNELS-1 downto 0);
-  dout_n  : out STD_LOGIC_VECTOR(CHANNELS-1 downto 0);
+  -- Filtered outputs
+  dout          : out STD_LOGIC_VECTOR(CHANNELS-1 downto 0);      -- Cleaned output
+  dout_n        : out STD_LOGIC_VECTOR(CHANNELS-1 downto 0);      -- Cleaned output (complemented)
 
-  toggle  : out STD_LOGIC_VECTOR(CHANNELS-1 downto 0);
-
-  irq     : out STD_LOGIC_VECTOR(CHANNELS-1 downto 0);
+  -- Byproducts
+  toggle        : out STD_LOGIC_VECTOR(CHANNELS-1 downto 0);      -- Toggling output  : toggles when 'dout' changes
+  irq           : out STD_LOGIC_VECTOR(CHANNELS-1 downto 0);      -- IRQ output       : pulses when 'dout' changes
+  irq_trig_pol  : in  STD_LOGIC_VECTOR((2*CHANNELS)-1 downto 0)   -- Define the event that triggers the IRQ:
+                                                                  -- - "00": never
+                                                                  -- - "01": rising edge
+                                                                  -- - "10": falling edge
+                                                                  -- - "11": both
 );
 end debouncer;
 
@@ -76,11 +83,11 @@ end debouncer;
 -- ============================================================================
 architecture archDefault of debouncer is
 
-  
-  
+
+
 begin
 
-  gen_instances : for i in 0 to CHANNELS-1 generate
+  gen_instances : for i in 0 to (CHANNELS-1) generate
   begin
     u_debouncer : entity debouncer_lib.debouncer(archDefault)
     generic map
@@ -93,19 +100,20 @@ begin
     )
     port map
     ( 
-      clock   => clock,
-      reset   => reset,
+      clock         => clock,
+      reset         => reset,
   
-      din     => din(i)
+      din           => din(i)
   
-      dout    => dout(i),
-      dout_n  => dout_n(i),
+      dout          => dout(i),
+      dout_n        => dout_n(i),
 
-      toggle  => toggle(i)
+      toggle        => toggle(i)
 
-      irq     => irq(i)
+      irq           => irq(i),
+      irq_trig_pol  => irq_trig_pol((2*i+1) downto (2*i))
 
-      count   => open
+      count         => open
     );
   end generate;
 

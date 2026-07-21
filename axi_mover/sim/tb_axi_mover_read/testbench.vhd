@@ -1,11 +1,11 @@
 -- ============================================================================
 -- Project        : -
--- Module name    : tb_debouncer
--- File name      : tb_debouncer.vhd
+-- Module name    : testbench
+-- File name      : testbench.vhd
 -- File type      : VHDL 2008
--- Purpose        : testbench for the debouncer module
+-- Purpose        : testbench for the AXI data mover
 -- Author         : QuBi (nitrogenium@outlook.fr)
--- Creation date  : Thursday, 14 August 2025
+-- Creation date  : Tuesday, 21 July 2026
 -- ----------------------------------------------------------------------------
 -- Best viewed with space indentation (2 spaces)
 -- ============================================================================

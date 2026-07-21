@@ -5,7 +5,7 @@
 -- File type      : VHDL 2008
 -- Purpose        : debouncer module for push buttons
 -- Author         : QuBi (nitrogenium@outlook.fr)
--- Creation date  : August 13th, 2025
+-- Creation date  : Wednesday, 13 August 2025
 -- ----------------------------------------------------------------------------
 -- Best viewed with space indentation (2 spaces)
 -- ============================================================================
@@ -17,8 +17,8 @@
 -- The module includes the synchronizing input DFFs.
 --
 -- It provides various types of outputs:
--- * state output : current state of the push button 
--- * toggle output: state changes on every button press
+-- * state        : current state of the push button 
+-- * toggle       : state changes on every button press
 -- * irq output   : pulse every time an event is detected on the button.
 --
 -- Known limitations: 
@@ -45,28 +45,35 @@ library work; use work.debouncer_pkg.all;
 entity debouncer_core is
 generic
 (
-  RESET_SYNC      : BOOLEAN;                    -- Make the reset synchronous
-  RESET_POL       : STD_LOGIC;                  -- Reset active state
-  CLOCK_FREQ_MHZ  : REAL;                       -- Clock frequency in MHz
-  BLIND_TIME_MS   : REAL := 1.0;                -- Time period (in ms) during which the state of the input is ignored
-  IRQ_TRIG_POL    : INTEGER range 0 to 2 := 1;  -- IRQ trigger event: rising edge (0), falling edge (1) or both (2)
-  IRQ_DURATION    : INTEGER range 1 to 15 := 1  -- IRQ notification time (in clock cycles)
+  RESET_SYNC      : BOOLEAN;                -- True: synchronous reset. False: asynchronous reset
+  RESET_POL       : STD_LOGIC;              -- Reset active state
+  CLOCK_FREQ_MHZ  : REAL;                   -- System clock frequency (in MHz)
+  BLIND_TIME_MS   : REAL;                   -- Time period (in ms) during which the state of the input is ignored
+  IRQ_DURATION    : INTEGER range 1 to 15   -- IRQ notification time (in clock cycles)
 );
 port
 ( 
-  clock   : in STD_LOGIC;
-  reset   : in STD_LOGIC; 
+  -- System interface
+  clock         : in STD_LOGIC;
+  reset         : in STD_LOGIC; 
   
-  din     : in STD_LOGIC;
+  -- Noisy inputs
+  din           : in STD_LOGIC;
   
-  dout    : out STD_LOGIC;
-  dout_n  : out STD_LOGIC;
+  -- Filtered outputs
+  dout          : out STD_LOGIC;                                  -- Cleaned output
+  dout_n        : out STD_LOGIC;                                  -- Cleaned output (complemented)
 
-  toggle  : out STD_LOGIC;
+  -- Byproducts
+  toggle        : out STD_LOGIC;                                  -- Toggling output  : toggles when 'dout' changes
+  irq           : out STD_LOGIC;                                  -- IRQ output       : pulses when 'dout' changes
+  irq_trig_pol  : in  STD_LOGIC_VECTOR((2*CHANNELS)-1 downto 0);  -- Define the event that triggers the IRQ:
+                                                                  -- * "00": never
+                                                                  -- * "01": rising edge
+                                                                  -- * "10": falling edge
+                                                                  -- * "11": both
 
-  irq     : out STD_LOGIC;                      -- IRQ output request (pulse)
-
-  count   : out STD_LOGIC_VECTOR(9 downto 0)    -- Number of bounces detected during the blind time
+  count         : out STD_LOGIC_VECTOR(9 downto 0)                -- Number of bounces detected during the blind time
 );
 end debouncer_core;
 

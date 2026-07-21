@@ -28,9 +28,7 @@ package debouncer_pkg is
   -- --------------------------------------------------------------------------
   -- Constants / Types
   -- --------------------------------------------------------------------------
-  constant IRQ_TRIGGER_POL_RISING   : INTEGER := 0;
-  constant IRQ_TRIGGER_POL_FALLING  : INTEGER := 1;
-  constant IRQ_TRIGGER_POL_BOTH     : INTEGER := 2;
+  -- None.
   
   -- --------------------------------------------------------------------------
   -- Components
