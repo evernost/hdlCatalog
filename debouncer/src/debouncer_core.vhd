@@ -17,7 +17,7 @@
 -- The module includes the synchronizing input DFFs.
 --
 -- It provides various types of outputs:
--- * state        : current state of the push button 
+-- * dout        : current state of the push button 
 -- * toggle       : state changes on every button press
 -- * irq output   : pulse every time an event is detected on the button.
 --
@@ -45,8 +45,8 @@ library work; use work.debouncer_pkg.all;
 entity debouncer_core is
 generic
 (
-  RESET_SYNC      : BOOLEAN;                -- True: synchronous reset. False: asynchronous reset
   RESET_POL       : STD_LOGIC;              -- Reset active state
+  RESET_SYNC      : BOOLEAN;                -- True: synchronous reset. False: asynchronous reset
   CLOCK_FREQ_MHZ  : REAL;                   -- System clock frequency (in MHz)
   BLIND_TIME_MS   : REAL;                   -- Time period (in ms) during which the state of the input is ignored
   IRQ_DURATION    : INTEGER range 1 to 15   -- IRQ notification time (in clock cycles)
@@ -61,19 +61,22 @@ port
   din           : in STD_LOGIC;
   
   -- Filtered outputs
-  dout          : out STD_LOGIC;                                  -- Cleaned output
-  dout_n        : out STD_LOGIC;                                  -- Cleaned output (complemented)
+  dout          : out STD_LOGIC;                      -- Cleaned output
+  dout_n        : out STD_LOGIC;                      -- Cleaned output (complemented)
 
   -- Byproducts
-  toggle        : out STD_LOGIC;                                  -- Toggling output  : toggles when 'dout' changes
-  irq           : out STD_LOGIC;                                  -- IRQ output       : pulses when 'dout' changes
-  irq_trig_pol  : in  STD_LOGIC_VECTOR((2*CHANNELS)-1 downto 0);  -- Define the event that triggers the IRQ:
-                                                                  -- * "00": never
-                                                                  -- * "01": rising edge
-                                                                  -- * "10": falling edge
-                                                                  -- * "11": both
-
-  count         : out STD_LOGIC_VECTOR(9 downto 0)                -- Number of bounces detected during the blind time
+  toggle        : out STD_LOGIC;                      -- Toggling output  : toggles when 'dout' changes
+  irq           : out STD_LOGIC;                      -- IRQ output       : pulses when 'dout' changes
+  irq_trig_pol  : in  STD_LOGIC_VECTOR(1 downto 0);   -- Define the event that triggers the IRQ:
+                                                      -- * "00": never
+                                                      -- * "01": rising edge
+                                                      -- * "10": falling edge
+                                                      -- * "11": both
+  
+  -- Observables
+  warning       : out STD_LOGIC;                      -- '1' when a bounce occured very close to the end of the last blind time,
+                                                      -- which suggests that BLIND_TIME_MS is not sufficient.
+  count         : out STD_LOGIC_VECTOR(9 downto 0)    -- Number of bounces detected during the last blind time.
 );
 end debouncer_core;
 
@@ -88,9 +91,9 @@ architecture archDefault of debouncer_core is
 
   constant TIMER_PRESET : UNSIGNED(31 downto 0) := TO_UNSIGNED(INTEGER(CLOCK_FREQ_MHZ*1000.0*BLIND_TIME_MS)-1, 32);
 
-  signal button_R    : STD_LOGIC;
-  signal button_RR   : STD_LOGIC;
-  signal button_sync : STD_LOGIC;
+  signal din_R    : STD_LOGIC;
+  signal din_RR   : STD_LOGIC;
+  signal din_sync : STD_LOGIC;
 
   signal timer : STD_LOGIC_VECTOR(31 downto 0);
 
@@ -110,25 +113,25 @@ begin
   -- PROCESS NAME: resynchronizer
   -- DESCRIPTION: 
   -- Bring back the asynchronous input to the synchronous domain.
-  -- (3 stages resynchronizer, should be enough for most architectures)
+  -- (3 stages resynchronizer: should be enough for most architectures)
   -- --------------------------------------------------------------------------
   p_sync : process(clock, reset)
   procedure resetProcedure is 
   begin
-    button_R    <= '0';
-    button_RR   <= '0';
-    button_sync <= '0';
+    din_R     <= '0';
+    din_RR    <= '0';
+    din_sync  <= '0';
   end resetProcedure;
   begin
 		if (not(RESET_SYNC) and (reset = RESET_POL)) then
       resetProcedure;
-		elsif(clock'event and clock = '1') then
+		elsif (clock'event and (clock = '1')) then
 			if (RESET_SYNC and (reset = RESET_POL)) then
         resetProcedure;
       else
-        button_R    <= button_in;
-        button_RR   <= button_R;
-        button_sync <= button_RR;
+        din_R    <= din;
+        din_RR   <= din_R;
+        din_sync <= din_RR;
       end if;
     end if;
   end process p_sync;
@@ -148,13 +151,14 @@ begin
     event_flag      <= '0';
     out_reg         <= '0';
     toggle_reg      <= '0';
-    bounce_count    <= (others => '0');
+    count           <= (others => '0');
     bounce_cnt_reg  <= (others => '0');
+    warning_reg     <= '0';
   end resetProcedure;
   begin
 		if (not(RESET_SYNC) and (reset = RESET_POL)) then
       resetProcedure;
-		elsif(clock'event and clock = '1') then
+		elsif (clock'event and (clock = '1')) then
 			if (RESET_SYNC and (reset = RESET_POL)) then
         resetProcedure;
       else
@@ -164,27 +168,25 @@ begin
           -- WAIT_EVENT State
           -- ------------------------------------------------------------------
           when WAIT_EVENT => 
-            if (button_sync /= out_reg) then
-              fsm_state <= FREEZE;
-              timer     <= STD_LOGIC_VECTOR(TIMER_PRESET);
+            if (din_sync /= out_reg) then
+              fsm_state   <= FREEZE;
+              timer       <= STD_LOGIC_VECTOR(TIMER_PRESET);
+              event_flag  <= '0';
               
-              if (IRQ_TRIG_POL = IRQ_TRIGGER_POL_RISING) then
-                if (button_sync = '1') and (out_reg = '0') then
+              if (irq_trig_pol(0) = '1') then
+                if ((din_sync = '1') and (out_reg = '0')) then
                   event_flag <= '1';
-                else 
-                  event_flag <= '0';
                 end if;
-              elsif (IRQ_TRIG_POL = IRQ_TRIGGER_POL_FALLING) then
-                if (button_sync = '0') and (out_reg = '1') then
-                  event_flag <= '1';
-                else 
-                  event_flag <= '0';
-                end if;
-              else
-                event_flag <= '1';
               end if;
+              
+              if (irq_trig_pol(1) = '1') then
+                if ((din_sync = '0') and (out_reg = '1')) then
+                  event_flag <= '1';
+                end if;
+              end if;
+            
             else
-              -- Nothing happened
+              -- Nothing happened, keep waiting.
             end if;
 
           -- ------------------------------------------------------------------
@@ -194,15 +196,15 @@ begin
             if (timer = STD_LOGIC_VECTOR(to_unsigned(0, timer'length))) then
               fsm_state       <= WAIT_EVENT;
               timer           <= (others => '0');
-              out_reg         <= button_sync;
-              toggle_reg      <= toggle_reg xor button_sync;
+              out_reg         <= din_sync;
+              toggle_reg      <= toggle_reg xor din_sync;
               event_flag      <= '0';
-              bounce_count    <= bounce_cnt_reg;
+              count           <= bounce_cnt_reg;
               bounce_cnt_reg  <= (others => '0');
             else
               timer         <= STD_LOGIC_VECTOR(UNSIGNED(timer) - 1);
               event_flag    <= '0';
-              bounce_count  <= (others => '0');
+              count  <= (others => '0');
               
               if FALSE then
                 bounce_cnt_reg <= STD_LOGIC_VECTOR(UNSIGNED(bounce_cnt_reg)+1);
@@ -218,8 +220,8 @@ begin
             timer             <= (others => '0');
             event_flag        <= '0';
             out_reg           <= '0';
-            bounce_count      <= bounce_cnt_reg;
-            bounce_cnt_reg  <= (others => '0');
+            count             <= bounce_cnt_reg;
+            bounce_cnt_reg    <= (others => '0');
 
         end case;
       end if;
@@ -236,19 +238,19 @@ begin
   p_output : process(clock, reset)
   procedure resetProcedure is 
   begin
-    state   <= '0';
-    state_n <= '0';
+    dout   <= '0';
+    dout_n <= '0';
     toggle  <= '0';
   end resetProcedure;
   begin
 		if (not(RESET_SYNC) and (reset = RESET_POL)) then
       resetProcedure;
-		elsif(clock'event and clock = '1') then
+		elsif (clock'event and (clock = '1')) then
 			if (RESET_SYNC and (reset = RESET_POL)) then
         resetProcedure;
       else
-        state   <= out_reg;
-        state_n <= not(out_reg);
+        dout    <= out_reg;
+        dout_n  <= not(out_reg);
         toggle  <= toggle_reg;
       end if;
     end if;
@@ -259,7 +261,7 @@ begin
   -- --------------------------------------------------------------------------
   -- PROCESS NAME: IRQ generator
   -- DESCRIPTION: 
-  -- Description is TODO.
+  -- Generates the IRQ signals from the FSM.
   -- --------------------------------------------------------------------------
   p_event : process(clock, reset)
   procedure resetProcedure is 
@@ -271,7 +273,7 @@ begin
   begin
 		if (not(RESET_SYNC) and (reset = RESET_POL)) then
       resetProcedure;
-		elsif(clock'event and clock = '1') then
+		elsif (clock'event and (clock = '1')) then
 			if (RESET_SYNC and (reset = RESET_POL)) then
         resetProcedure;
       else

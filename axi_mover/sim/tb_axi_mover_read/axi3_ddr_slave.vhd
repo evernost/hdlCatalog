@@ -235,6 +235,8 @@ architecture sim of axi3_ddr_slave is
     result := res;
   end procedure;
 
+
+
   -----------------------------------------------------------------------------
   -- Read-channel state
   -----------------------------------------------------------------------------
@@ -255,6 +257,8 @@ architecture sim of axi3_ddr_slave is
   signal S_AXI_RLAST_i   : std_logic := '0';
   signal S_AXI_RDATA_i   : std_logic_vector(G_DATA_WIDTH-1 downto 0) := (others => '0');
   signal S_AXI_RID_i     : std_logic_vector(G_ID_WIDTH-1 downto 0)   := (others => '0');
+
+
 
   -----------------------------------------------------------------------------
   -- Write-channel state

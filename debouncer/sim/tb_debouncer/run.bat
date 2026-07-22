@@ -1,5 +1,5 @@
 :: ============================================================================
-:: Project       : synthChip
+:: Project       : -
 :: Module name   : -
 :: File name     : run.bat
 :: File type     : Batch script for Windows
@@ -18,12 +18,12 @@ setlocal
 :: ============================================================================
 :: SETTINGS
 :: ============================================================================
-for /f "usebackq tokens=1,2 delims==" %%A in ("..\..\xilinx_tools_path.ini") do (
+for /f "usebackq tokens=1,2 delims==" %%A in ("..\..\..\xilinx_tools_path.ini") do (
   set %%A=%%B
 )
 echo [INFO] Reading Vivado 'bin' path from 'xilinx_tools_path.ini': '%VIVADO_BIN%'
 
-set WCFG_FILE="tb_sim.wcfg"
+set WCFG_FILE="testbench.wcfg"
 
 
 
@@ -31,11 +31,12 @@ set WCFG_FILE="tb_sim.wcfg"
 :: SYNTAX CHECK AND COMPILE
 :: ============================================================================
 echo [INFO] Syntax check...
-call %VIVADO_BIN%\xvhdl --work debouncer_lib ../../src/debouncer/debouncer_pkg.vhd
-call %VIVADO_BIN%\xvhdl --work debouncer_lib ../../src/debouncer/debouncer.vhd
+call %VIVADO_BIN%\xvhdl --work debouncer_lib ../../src/debouncer_pkg.vhd
+call %VIVADO_BIN%\xvhdl --work debouncer_lib ../../src/debouncer_core.vhd
+call %VIVADO_BIN%\xvhdl --work debouncer_lib ../../src/debouncer.vhd
 echo [DEBUG] 'xvhdl' command return code: %ERRORLEVEL%
 
-call %VIVADO_BIN%\xvhdl --work work tb_debouncer.vhd
+call %VIVADO_BIN%\xvhdl --work work testbench.vhd
 echo [DEBUG] 'xvhdl' command return code: %ERRORLEVEL%
 
 
@@ -43,7 +44,8 @@ echo [DEBUG] 'xvhdl' command return code: %ERRORLEVEL%
 :: TESTBENCH ELABORATION
 :: ============================================================================
 echo [INFO] Elaborating...
-call %VIVADO_BIN%\xelab tb_debouncer -L debouncer_lib -generic_top "IRQ_DURATION=3" -s tb_sim -debug all
+::call %VIVADO_BIN%\xelab tb_debouncer -L debouncer_lib -generic_top "IRQ_DURATION=3" -s tb_sim -debug all
+call %VIVADO_BIN%\xelab testbench -L debouncer_lib -s tb_sim -debug all
 
 
 

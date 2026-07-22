@@ -45,8 +45,8 @@ library work; use work.debouncer_pkg.all;
 entity debouncer is
 generic
 (
-  RESET_SYNC      : BOOLEAN;                -- True: synchronous reset. False: asynchronous reset
   RESET_POL       : STD_LOGIC;              -- Reset active state
+  RESET_SYNC      : BOOLEAN;                -- True: synchronous reset. False: asynchronous reset
   CLOCK_FREQ_MHZ  : REAL;                   -- System clock frequency (in MHz)
   CHANNELS        : INTEGER;                -- Number of channels to debounce
   BLIND_TIME_MS   : REAL;                   -- Time period (in ms) during which the state of the input is ignored
@@ -68,7 +68,7 @@ port
   -- Byproducts
   toggle        : out STD_LOGIC_VECTOR(CHANNELS-1 downto 0);      -- Toggling output  : toggles when 'dout' changes
   irq           : out STD_LOGIC_VECTOR(CHANNELS-1 downto 0);      -- IRQ output       : pulses when 'dout' changes
-  irq_trig_pol  : in  STD_LOGIC_VECTOR((2*CHANNELS)-1 downto 0)   -- Define the event that triggers the IRQ:
+  irq_trig_pol  : in  STD_LOGIC_VECTOR((2*CHANNELS)-1 downto 0)   -- Define the event, for each channel, that triggers the IRQ:
                                                                   -- - "00": never
                                                                   -- - "01": rising edge
                                                                   -- - "10": falling edge
@@ -83,8 +83,8 @@ end debouncer;
 -- ============================================================================
 architecture archDefault of debouncer is
 
-
-
+  -- No internal signals.
+  
 begin
 
   gen_instances : for i in 0 to (CHANNELS-1) generate

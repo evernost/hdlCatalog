@@ -191,7 +191,7 @@ begin
   
     if (not(RESET_SYNC) and (reset = RESET_POL)) then
       resetProcedure;
-    elsif(clock'event and clock = '1') then
+    elsif (clock'event and (clock = '1')) then
       if (RESET_SYNC and (reset = RESET_POL)) then
         resetProcedure;
       else
