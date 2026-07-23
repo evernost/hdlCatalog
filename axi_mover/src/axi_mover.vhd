@@ -74,8 +74,8 @@ use IEEE.NUMERIC_STD.all;
 entity axi_mover is
 generic
 (
-  RESET_SYNC        : BOOLEAN;
   RESET_POL         : STD_LOGIC;
+  RESET_SYNC        : BOOLEAN;
   M_AXI_ADDR_WIDTH  : INTEGER;
   M_AXI_DATA_WIDTH  : INTEGER;
   M_AXI_ID_WIDTH    : INTEGER;

@@ -68,11 +68,12 @@ port
   -- Byproducts
   toggle        : out STD_LOGIC_VECTOR(CHANNELS-1 downto 0);      -- Toggling output  : toggles when 'dout' changes
   irq           : out STD_LOGIC_VECTOR(CHANNELS-1 downto 0);      -- IRQ output       : pulses when 'dout' changes
-  irq_trig_pol  : in  STD_LOGIC_VECTOR((2*CHANNELS)-1 downto 0)   -- Define the event, for each channel, that triggers the IRQ:
+  irq_trig_pol  : in  STD_LOGIC_VECTOR((2*CHANNELS)-1 downto 0);  -- Define the event, for each channel, that triggers the IRQ:
                                                                   -- - "00": never
                                                                   -- - "01": rising edge
                                                                   -- - "10": falling edge
                                                                   -- - "11": both
+  warning       : out STD_LOGIC
 );
 end debouncer;
 
@@ -83,7 +84,7 @@ end debouncer;
 -- ============================================================================
 architecture archDefault of debouncer is
 
-  -- No internal signals.
+  signal warning_inst : STD_LOGIC_VECTOR(CHANNELS-1 downto 0);
   
 begin
 
@@ -113,8 +114,41 @@ begin
       irq           => irq(i),
       irq_trig_pol  => irq_trig_pol((2*i+1) downto (2*i))
 
+      warning       => warning_inst(i)
       count         => open
     );
   end generate;
+
+
+
+  -- --------------------------------------------------------------------------
+  -- PROCESS NAME: p_warnMerge
+  -- DESCRIPTION: 
+  -- 'or' together the warning signals.
+  -- --------------------------------------------------------------------------
+  p_warnMerge : process(clock, reset)
+  procedure resetProcedure is 
+  begin
+    warning <= '0';
+  end resetProcedure;
+  
+    variable ret : STD_LOGIC;
+  
+  begin
+		if (not(RESET_SYNC) and (reset = RESET_POL)) then
+      resetProcedure;
+		elsif (clock'event and (clock = '1')) then
+			if (RESET_SYNC and (reset = RESET_POL)) then
+        resetProcedure;
+      else
+        ret := '0';
+        for i in warning_inst'range loop
+          ret := ret or warning_inst(i);
+        end loop;
+        
+        warning <= ret;
+      end if;
+    end if;
+  end process p_warnMerge;
 
 end archDefault;

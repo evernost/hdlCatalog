@@ -41,7 +41,8 @@ end testbench;
 -- ============================================================================
 architecture sim of testbench is
 
-  constant CLOCK_PERIOD : TIME := 1 sec / (CLOCK_FREQ_MHZ * 1.0E6);
+  constant CLOCK_FREQ_MHZ : REAL := 100.0;
+  constant CLOCK_PERIOD   : TIME := 1 sec / (CLOCK_FREQ_MHZ * 1.0E6);
   
   constant BLIND_TIME_MS  : REAL := 2.0;
   constant CHANNELS       : INTEGER := 3;
