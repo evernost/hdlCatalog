@@ -1,5 +1,5 @@
 -- ============================================================================
--- Project        : -
+-- Project        : hdlCatalog/debouncer
 -- Module name    : testbench
 -- File name      : testbench.vhd
 -- File type      : VHDL 2008

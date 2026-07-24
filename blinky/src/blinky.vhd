@@ -1,5 +1,5 @@
 -- ============================================================================
--- Project        : Blinky
+-- Project        : hdlCatalog/blinky
 -- Module name    : blinky
 -- File name      : blinky.vhd
 -- File type      : VHDL 2008

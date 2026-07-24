@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # =============================================================================
-# Project       : Blinky
+# Project       : hdlCatalog/blinky
 # Module name   : makeBrightnessLut
 # File name     : makeBrightnessLut.py
 # File type     : Python script (Python 3)
